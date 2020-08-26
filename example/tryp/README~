@@ -1,7 +1,7 @@
 a 'complete' walkthrough
 of file prep and running of dockeye
 starting from a pdb file from www.rcsb.org
-(3ptb.pdb) and ending with a pose extracted
+(3ptb.pdb) and ending with apose extracted
 from the dockeye_multi/PyMol session logfile.
 Workflow is described in the dockeye_workflow.pdf
 doc in the parent directory. It can be followed

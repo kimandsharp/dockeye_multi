@@ -23,7 +23,7 @@ setup.pml (optional) when run from within PyMol
         it invokes runs the dockeye python code
         to load the dockeye plugin, 
         and setups some nice display settings
-        for dockeye. only the line:
+        for dockeye. only the first line:
         de('<protein_pdbfile>','<ligand_pdbfile>')
         is required to run dockeye, and this can be typed
         directly into the command window if you like)

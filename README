@@ -15,8 +15,14 @@ obsolete by dockeye_multi
 directories:
 ===============================
 src (source files, shared object file, makefile)
-example (all files needed to run 
-examples trypsin/benzamidine, interleukin and antibody_digoxin)
+ sub_directories src_c, src_f contain the C and
+ Fortran versions of the dockeye backend. The C version
+ is full operational. The Fortran version is a straight
+ translation using f2py. Both produce a module importable
+ into Python. The C version has been tested on several platforms.
+ The Fortran version works but has only been tested on one platform
+example (all files needed to run th examples 
+ trypsin/benzamidine, interleukin and antibody_digoxin)
 
 ===============================
 INSTALLATION
@@ -24,7 +30,7 @@ INSTALLATION
 
 1)
 If you are lucky, one of the shared object files dockeyeM_energy_XX.so
-in the src directory will work- some builds are 32bit because 
+in the src_c directory will work- some builds are 32bit because 
 they work with older pymol versions (pre-schrodinger and ones compiled
 from source at sourceforge.net). In this case
 in the source directory make a soft link from the correct *.so to
@@ -39,7 +45,8 @@ some useful commands in this regard
 % otool -L dockeyeM_energy_XX.so # libraries required/linked (linux equiv cmd: ldd)
 
 2)
-Compile from c source code with the gcc compiler, using the makefile.
+In the direcdtory src_c, 
+compile from c source code with the gcc compiler, using the makefile.
 The makefile has various rules for MacOS and ubuntu Linux which
 should work with little modifification
 

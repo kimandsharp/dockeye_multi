@@ -1,7 +1,14 @@
 dockeye_multi code
+--------------------
 dockeyeM_energy.c  C code backend interaction energy compute engine
-dockeyeM_energy_XX.so  shared object file compiled from dockeyeM_energy.c
+                   (as of june 2020, this now lives in the src_c subdirectory;
+                   (a Fortran version is in src_f)
+dockeyeM_energy_XX.so  shared object file compiled from dockeyeM_energy(.c/.f)
                    as an importable Python module
+                   (this is produced by the makefile in either the src_c or src_f 
+                   subdirectory depending on language used, and it should
+                   be pointed to by a soft link named dockeyeM_energy.so in
+                   the parent directory, src)
 dockeyeM_c_vX.Y.py  version X.Y python code run within PyMol, which 
                    implements the graphical front end. Imports the
                    module dockeyeM_energy from dockeyeM_energy.so
@@ -27,6 +34,9 @@ make_conformers.py generates a ligand *.pdb file for use with dockeye_multi
                    the output file contains multiple ligand conformers based
                    on 3 rotation angles around specified torsions 
                    each conformer delimited by MODEL/ENDMDL
+make_conformers_flip.py does everything make_conformers.py does, then produces
+                   the three 180o flipped versions of each conformer (so 4x
+                   as many conformers in total - this can be large!)
 psf_to_atm.py      extracts charges from charm/namd *.psf file, and
                    pastes these plus atomic radii into a pdb file
 

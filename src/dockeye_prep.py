@@ -74,9 +74,20 @@ print( '2 max:  %8.3f %8.3f %8.3f ' % (gmax2[0],gmax2[1],gmax2[2]))
 xsep = [0.,0.,0.]
 xsep[0] = ((gmax2[0] - gmin2[0]) + (gmax1[0] - gmin1[0]))
 print('offsetting molecule2 by %8.3f %8.3f %8.3f ' % (xsep[0],xsep[1],xsep[2]))
+print('and rotating by Z-120o')
+cs = -0.5
+sn = math.sqrt(0.75)
+rmt = [[cs,sn,0.],[-sn,cs,0.],[0.,0.,1.]]
+xyz = [0.,0.,0.]
 for i in range(pdb2.natom):
+  #for k in range(3):
+  #  pdb2.coords[i][k] = pdb2.coords[i][k] - xsep[k] - gcen2[k] + gcen1[k] # translate
   for k in range(3):
-    pdb2.coords[i][k] = pdb2.coords[i][k] - xsep[k] - gcen2[k] + gcen1[k]
+    xyz[k] = pdb2.coords[i][k] - gcen2[k]
+  for k in range(3):
+    pdb2.coords[i][k] = - xsep[k] + gcen1[k]
+    for j in range(3):
+      pdb2.coords[i][k] += xyz[j]*rmt[j][k]
 qtot1 = 0.
 qtot2 = 0.
 for i in range(pdb1.natom):
