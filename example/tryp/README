@@ -1,0 +1,23 @@
+a 'complete' walkthrough
+of file prep and running of dockeye
+starting from a pdb file from www.rcsb.org
+(3ptb.pdb) and ending with apose extracted
+from the dockeye_multi/PyMol session logfile.
+Workflow is described in the dockeye_workflow.pdf
+doc in the parent directory. It can be followed
+by looking at the time stamps of the files in this
+directory:
+  8 -rw-r--r--  1 sharp  staff     897 Oct  4 14:07 de_ligand_qr_tor_pose_58.pdb
+104 -rw-r--r--  1 sharp  staff   53012 Oct  4 14:06 de_ligand_qr_tor_allposes.pdb
+ 56 -rw-r--r--  1 sharp  staff   28375 Oct  4 14:05 dockeyeM_4Oct2019_14:02:58.log.sav
+  4 -rw-rw-r-- 1 kim kim    309 Sep 17 16:29 setup.pml
+  4 -rw-rw-r-- 1 kim kim   1914 Sep 17 16:07 de_ligand_qr_tor.pdb
+  4 -rw-rw-r-- 1 kim kim    808 Sep 17 16:06 de_ligand_qr.pdb
+  4 -rw-rw-r-- 1 kim kim    903 Sep 17 16:01 de_ligand.pdbqt
+136 -rw-rw-r-- 1 kim kim 137037 Sep 17 15:58 de_prot_qr.pdb
+160 -rw-rw-r-- 1 kim kim 161192 Sep 17 15:54 de_prot.pdbqt
+  4 -rw-rw-r-- 1 kim kim    621 Sep 17 15:39 de_ligand.pdb
+112 -rw-rw-r-- 1 kim kim 112401 Sep 17 15:39 de_prot.pdb
+  4 -rw-rw-r-- 1 kim kim    729 Sep 17 10:46 3ptb_ben.pdb
+132 -rw-rw-r-- 1 kim kim 132030 Sep 17 10:45 3ptb_prot.pdb
+180 -rw-rw-r-- 1 kim kim 183303 Sep 17 10:44 3ptb.pdb

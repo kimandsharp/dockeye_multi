@@ -1,0 +1,42 @@
+dockeye_multi code
+dockeyeM_energy.c  C code backend interaction energy compute engine
+dockeyeM_energy_XX.so  shared object file compiled from dockeyeM_energy.c
+                   as an importable Python module
+dockeyeM_c_vX.Y.py  version X.Y python code run within PyMol, which 
+                   implements the graphical front end. Imports the
+                   module dockeyeM_energy from dockeyeM_energy.so
+                   to run the backend
+dockeyeM_c.py      logical link to specific version code, 
+dockeye_methods.py defs/classes/methods 
+matrix3.py         basic vector/matrix ops for make_conformers.py
+
+helper/prep programs
+dockeye_prep.py    optional prep stage. Using your pdb format files,
+                   will nicely position your
+                   protein and ligand ready for dockeye
+                   note this does NOT do the charge/radius assignment
+                   and pasting into the occupancy and b-factor fields
+                   prep step: that can be done several ways depending
+                   on how your charges are assigned.
+pdbqt_to_pdb.py    reads pdbqt format coordinate file output from autodock tools,
+                   moves autdock charges into bfactor field, and assigns radii.
+                   use on protein target pdbqt file and on ligand pdbqt file 
+make_conformers.py generates a ligand *.pdb file for use with dockeye_multi
+                   reads the torsion/root/branch records placed inside a pdb file
+                   by the vina autodock tool, adt. 
+                   the output file contains multiple ligand conformers based
+                   on 3 rotation angles around specified torsions 
+                   each conformer delimited by MODEL/ENDMDL
+psf_to_atm.py      extracts charges from charm/namd *.psf file, and
+                   pastes these plus atomic radii into a pdb file
+
+post-dockeye
+dockeyeM_getpose.py extracts low energy ligand poses from the dockeye
+                   logfile into a pdb format file, also makes a movie
+                   of all the poses
+
+to use dockeye_multi within PyMol this src directory must be added
+to your PYTHONPATH environment variable
+
+for more information on the way to use the various programs, see the 
+dockeye_workflow.pdf document in the parent directory.

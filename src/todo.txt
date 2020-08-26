@@ -1,0 +1,8 @@
+make_conformer.py: rationlize torsion dof's
+freom end record, branch records, and active/inactive
+torsion list in header remark sections. this only 
+needs to happen in changed # or dof's in adt/ligand
+processing.
+
+clipping of protein # of atoms: suppress message from C 
+subroutine, and fix- not working now

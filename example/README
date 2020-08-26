@@ -1,0 +1,100 @@
+Everything needed for dockeye examples
+assuming that you have PyMol installed
+and that the src directory where the dockeye module (shared object file)
+and other methods files reside, has been added to the PYTHONPATH
+environment variable
+-------------------------------------------------------
+required files
+-------------------------------------------------------
+<protein_binding_site>.pdb
+        pdb format file of protein with radii
+        and charges in the occupancy and B_factor fields)
+
+<ligand>.pdb
+        pdb format file of ligand with radii
+        and charges in the occupancy and B_factor fields
+        and a set of conformer coordinates, each 
+        delimited by 
+        MODEL
+        ENDMDL
+        records
+
+setup.pml (optional) when run from within PyMol
+        it invokes runs the dockeye python code
+        to load the dockeye plugin, 
+        and setups some nice display settings
+        for dockeye. only the first line:
+        de('<protein_pdbfile>','<ligand_pdbfile>')
+        is required to run dockeye, and this can be typed
+        directly into the command window if you like)
+
+-------------------------------------------------------
+running
+-------------------------------------------------------
+1) Start up Pymol
+
+2) Either run the file dockeyeM_c.py in the
+src directory from within PyMol, or put a line like
+run ~/source/dockeye_multi/src/dockeyeM_c.py
+in the file .pymolrc in your home directory
+to automatically run it every time you start up 
+PyMol
+
+3) Run the file setup.pml from 
+PyMol (optional) or type
+de('<protein_pdbfile>','<ligand_pdbfile>')
+in the command window
+
+other default command line options that can be overidden are:
+charges=True,logscale=True,dielectric=80.,eps=0.1
+
+4)
+change to 3 button mouse editing
+
+5)
+mouse over the ligand and hold down shift key: translations
+and rotations then apply to that molecule only. Release shift key to
+apply global trans, rot.
+
+dockeye object refresh can be paused by deselecting the dockeye object
+in the object menu
+
+6)
+the dockeye plugin creates new graphical elements:
+
+A)
+the protein-ligand interaction energy bars on the left:
+electrostatic, van der Waals, total
+red = positive energy, blue = negative energy.
+there is a green 'low water mark' which marks the best
+(most -ve) energy so far.
+each time a new low is discovered, the pose is written to a
+date/time-stamped log file.
+
+(ligand pdb files can be generated later from these stored
+poses by running dockeyeM_getpose.py on the log file and
+selecting any of the poses)
+
+B)
+the 'dockeye object' named in the pymol object menu
+dockeye_obj:
+A set of colored circles characterizing
+the interaction between ligand and protein.
+For every ligand-protein atomic pair interaction above some
+absolute energy cutoff (+-ve or -ve), 
+a circle is generated. Its position is midway between
+the atom pairs, oriented perpedicular to line joining the
+two atoms. Its radius varies inversely with distance,
+and it is color coded according to the sign of the total 
+pair interaction energy
+
+In brief, the 'Game' you are playing is
+to move that green bar downwards, by surrounding the ligand
+by as many blue cicles as you can get, and avoiding those red circles!
+
+Absence/presence, position, orientation and colors of circles give you
+visual clues about extent of shape, chemical complementarity,
+where are the good, bad or missing interactions,
+and how to re-position the ligand.
+
+Good Luck!
