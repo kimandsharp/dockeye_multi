@@ -5,16 +5,15 @@
 */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <Python.h>
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
-int MAXATOMP = 12000;
-int MAXATOML = 300;
+int MAXATOMP = 6000;
+int MAXATOML = 6000;
 int MAXCIRCLE = 500;
 int NUM_POINTS = 10;
 int MAXDATA = 70000; /* should be at least 12*MAXCIRCLE*NUM_POINTS+5 */
-int MAXMOD = 729;
+int MAXMOD = 100;
 /* pymol cgo keywords */
 float BEGIN = 2.0;
 float END = 3.0;
@@ -145,8 +144,8 @@ static PyObject * energy_c(PyObject *self, PyObject *args)
          n1 = MAXATOMP;
     }
     if (n2 > MAXATOML){
-         printf ("# atoms %d > MAXATOML %d: will quit \n",n2, MAXATOML);
-         exit(1);
+         printf ("# atoms %d > MAXATOML %d: will truncate \n",n2, MAXATOML);
+         n2 = MAXATOML;
     }
     /*
     get rest of data

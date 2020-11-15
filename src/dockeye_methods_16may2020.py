@@ -89,8 +89,6 @@ class pdb_struct:
           # if first model, create temporary pdb file for pymol
           if(self.nmodel == 1):
             tmp_pdb = open('dockeye_lig.pdb','w')
-            gcen = [0.,0.,0.]
-            dcen = 2.
           nline += 1
           entry = contents[nline]
           #print(entry)
@@ -103,10 +101,7 @@ class pdb_struct:
               self.coords.append([xyz[0],xyz[1],xyz[2]])
               # only do names, charge, radius for first model
               if(self.nmodel == 1):
-                # this code will write ligand conformer #1 as graphical manipulation 'handle'
-                tmp_pdb.write(entry)  
-                for k in range(3):
-                  gcen[k] += xyz[k]
+                tmp_pdb.write(entry)
                 self.natom +=1
                 self.occ.append(float(entry[54:60]))
                 self.bfact.append(float(entry[61:67]))
@@ -133,29 +128,6 @@ class pdb_struct:
             entry = contents[nline]
           # end of model
           if(self.nmodel == 1):
-            # this code will generate a 3-d cross as a graphical manipulation handle
-            """
-            for k in range(3): # create molecular handle for rot/trans
-              gcen[k] /= self.natom
-            strhead = 'HETATM    1  C1  HND A   1    '
-            strtail = '  1.00  0.00           C'
-            tmp_pdb.write("%s%8.3f%8.3f%8.3f%s\n" % (strhead,gcen[0],gcen[1],gcen[2],strtail))
-            gcen[0] += dcen
-            tmp_pdb.write("%s%8.3f%8.3f%8.3f%s\n" % (strhead,gcen[0],gcen[1],gcen[2],strtail))
-            gcen[0] -= 2.*dcen
-            tmp_pdb.write("%s%8.3f%8.3f%8.3f%s\n" % (strhead,gcen[0],gcen[1],gcen[2],strtail))
-            gcen[0] += dcen
-            gcen[1] += dcen
-            tmp_pdb.write("%s%8.3f%8.3f%8.3f%s\n" % (strhead,gcen[0],gcen[1],gcen[2],strtail))
-            gcen[1] -= 2.*dcen
-            tmp_pdb.write("%s%8.3f%8.3f%8.3f%s\n" % (strhead,gcen[0],gcen[1],gcen[2],strtail))
-            gcen[1] += dcen
-            gcen[2] += dcen
-            tmp_pdb.write("%s%8.3f%8.3f%8.3f%s\n" % (strhead,gcen[0],gcen[1],gcen[2],strtail))
-            gcen[2] -= 2.*dcen
-            tmp_pdb.write("%s%8.3f%8.3f%8.3f%s\n" % (strhead,gcen[0],gcen[1],gcen[2],strtail))
-            # end of code for a 3-d cross as a graphical manipulation handle
-            """
             tmp_pdb.close()
         # end of file
         if(self.nmodel == 0):
