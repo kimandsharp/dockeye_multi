@@ -3,13 +3,15 @@ read pdb file with auto dock  torsion information from pdbqt
 and sample conformers, write out in MODEL/ENDMDL format
 for pymol and dockeye multi
 todo:
+put all conformers in same 'frame' by rmsd superposition
+either whole molecule or largest rigid fragment (scaffold)
 """
 import sys
 import math
 import matrix3 as mt
 import numpy as np
 import random as rn
-import supq_flip as supq
+import supq
 rn.seed(7777777)
 
 #
@@ -242,21 +244,10 @@ def rmsd_conf(iconf_ref,iconf,conf_coords,natom):
 #         MAIN
 # =======================
 # input file
-flipit = False
-print('\nread pdb file with auto dock  torsion information from pdbqt')
-print('and sample conformers, generate 3 180o-flipmers, and ')
-print('write out in MODEL/ENDMDL format for pymol and dockeye multi\n')
 if(len(sys.argv) < 2):
-  print('USAGE: python sample_conformers.py pdbfile {flipit (T/F)')
-  sys.exit()
-pdbfile = sys.argv[1]
-if(len(sys.argv) == 3):
-  flipit = True
-#
-if(flipit):
-  print('Generating 3 flipmers for each conformer')
+  pdbfile = input('pdb file containing adt torsion records>> ')
 else:
-  print('Not generating flipmers')
+  pdbfile = sys.argv[1]
 pdb1 = pdb_struct()
 pdb1.readfile(pdbfile)
 qnet = 0.
@@ -298,7 +289,7 @@ print('# of nonbond interactions: ',len(non_bonds))
 #
 # monte carlo sample rotamers
 #
-nconfmax = 10
+nconfmax = 20
 conf_coords = np.zeros((nconfmax,pdb1.natom,3),'f')
 conf_econf = np.zeros(nconfmax,'f')
 # make working copies of coords
@@ -427,11 +418,6 @@ for i in range(len(pdb1.rigid)):
     rigid_i = pdb1.rigid[i][0]
     rigid_j = pdb1.rigid[i][1]
     nrigid = rigid_j - rigid_i + 1
-#
-# allign by  whole molecule instead
-rigid_i = 1
-rigid_j = pdb1.natom
-nrigid = rigid_j - rigid_i + 1
 print('aligning by largest rigid unit: ',rigid_i,' to ',rigid_j)
 co1 = np.zeros((nrigid,3),'f')
 co2 = np.zeros((nrigid,3),'f')
@@ -489,6 +475,7 @@ for nconf in range(1,nconfmax):
 for nconf in range(nconfmax):
   pdb_out.write('MODEL %3d %12.5f\n' % (nconf,conf_econf[nconf]))
   for i in range(pdb1.natom):
+    # - rigid_i
     for k in range(3):
       xyz[k] = conf_coords[nconf][i][k]
     string = 'ATOM %6d%6s%4s%1s%4s    %8.3f%8.3f%8.3f%6.2f%7.3f \n' % (i,pdb1.name[i],pdb1.res[i], \
@@ -496,18 +483,5 @@ for nconf in range(nconfmax):
     pdb1.radius[i],pdb1.bfact[i])
     pdb_out.write(string)
   pdb_out.write('ENDMDL\n')
-  if(flipit):
-    crd_rot = supq.crd_flip(conf_coords[nconf],pdb1.natom)
-    for nf in range(3):
-      pdb_out.write('MODEL %3d %12.5f\n' % (nconf,conf_econf[nconf]))
-      for i in range(pdb1.natom):
-        for k in range(3):
-          xyz[k] = crd_rot[i][k][nf]
-        string = 'ATOM %6d%6s%4s%1s%4s    %8.3f%8.3f%8.3f%6.2f%7.3f \n' % (i,pdb1.name[i],pdb1.res[i], \
-        pdb1.chain[i], pdb1.resnum[i], xyz[0],xyz[1],xyz[2], \
-        pdb1.radius[i],pdb1.bfact[i])
-        pdb_out.write(string)
-      pdb_out.write('ENDMDL\n')
-
 print('# of conformers: ',nconf)
 pdb_out.close()

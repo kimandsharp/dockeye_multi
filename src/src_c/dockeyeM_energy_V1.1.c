@@ -25,7 +25,7 @@ float LINE = 1.0;
 float LINES = 1.0;
 float TRIANGLES =  4.0;
 float COLOR =  6.0;
-float LINEWIDTH =  10.0;
+float LINEWIDTH =  5.0;
 float RCUT=5., EPS=0.1, DIEL=80.;
 //===============================================
 void color_map(float color, float *rgb){
@@ -342,8 +342,8 @@ static PyObject * energy_c(PyObject *self, PyObject *args)
     }
     et = ee + ev;
     /* printf("%d interactions \n",ninter); */
-    printf("ftrans %f %f %f \n",*(ftrans+0),*(ftrans+1),*(ftrans+2));
-    printf("frot   %f %f %f \n",*(frot+0),*(frot+1),*(frot+2));
+    /* printf("ftrans %f %f %f \n",*(ftrans+0),*(ftrans+1),*(ftrans+2)); */
+    /* printf("frot   %f %f %f \n",*(frot+0),*(frot+1),*(frot+2)); */
     ndata = 12*NUM_POINTS*ninter + 5;
     if(ndata > MAXDATA){
       printf("warning: too many circles, increase maxdata \n");
@@ -421,6 +421,19 @@ static PyObject * energy_c(PyObject *self, PyObject *args)
     dsd[ndata] = ev;
     ndata++;
     dsd[ndata] = nbest;
+    ndata++;
+    // put force/torque terms at the end
+    dsd[ndata] = ftrans[0];
+    ndata++;
+    dsd[ndata] = ftrans[1];
+    ndata++;
+    dsd[ndata] = ftrans[2];
+    ndata++;
+    dsd[ndata] = frot[0];
+    ndata++;
+    dsd[ndata] = frot[1];
+    ndata++;
+    dsd[ndata] = frot[2];
     ndata++;
     dsd[0] = ndata; // we temp overwrite LINEWIDTH with ndata, 
     // printf ("display object length %d \n",ndata);

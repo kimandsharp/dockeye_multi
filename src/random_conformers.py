@@ -1,8 +1,8 @@
 """
 read pdb file with auto dock  torsion information from pdbqt
-and sample conformers, write out in MODEL/ENDMDL format
+and sample conformers randomly, keep nconf with lowest energy
+write out in MODEL/ENDMDL format
 for pymol and dockeye multi
-todo:
 """
 import sys
 import math
@@ -50,9 +50,6 @@ class pdb_struct:
         self.branchend = []
         self.branch_atoms = []
         self.ntor = 0
-        self.rigid = [] # rigid subsets
-        rigid_beg = 1
-        in_rigid = True
         for entry in contents:
             if(entry[0:7] == 'TORSDOF'):
               fields = entry.split()
@@ -67,10 +64,6 @@ class pdb_struct:
             if(entry[0:7] == 'ENDROOT'):
               self.root[1] = self.natom
               print('found root: ',self.root)
-              if(in_rigid):
-                self.rigid.append((rigid_beg,self.natom))
-                rigid_beg = self.natom + 1
-                in_rigid = False
             if(entry[0:6] == 'BRANCH'):
               nbranch += 1
               fields = entry.split()
@@ -79,17 +72,9 @@ class pdb_struct:
               self.branch_atoms.append([m1,m2])
               branch_stack.insert(0,nbranch)
               self.branchend.append(0)
-              if(in_rigid):
-                self.rigid.append((rigid_beg,self.natom))
-                rigid_beg = self.natom + 1
-                in_rigid = False
             if(entry[0:9] == 'ENDBRANCH'):
               i = branch_stack.pop(0) - 1
               self.branchend[i] = self.natom
-              if(in_rigid):
-                self.rigid.append((rigid_beg,self.natom))
-                rigid_beg = self.natom + 1
-                in_rigid = False
             if (entry[0:4] == 'ATOM') or (entry[0:6] == 'HETATM'):
                 self.natom +=1
                 xyz[0] = float(entry[30:38])
@@ -115,13 +100,11 @@ class pdb_struct:
                     print ("atom radius not in dictionary", atype)
                     self.atom_rads[atype] = 0.0
                     self.radius.append(0.0)
-                in_rigid = True
         print('# of branches: ',nbranch)
         if(len(branch_stack) !=0):
           print('ERROR: branches: ',branch_stack)
         print('branchends: ',self.branchend)
         print('branch atoms: ',self.branch_atoms)
-        print('rigid units: ',self.rigid)
         """
         for i in range(self.ntor):
           a1 = self.branch_atoms[i][0]
@@ -198,7 +181,7 @@ def make_nonbonds(bond_list,natom):
    
 def conf_energy(pdb1,crds,non_bonds):
   """ energy of current config- use conformer crds not original
-  pdb crds. assumes atm fomat input file (radii, cahrges in occ, bfact fields)
+  pdb crds. assumes atm fomat input file (radii, charges in occ, bfact fields)
   """
   efact = 332./80. # dielectric of water
   vfact = 4.*0.1  # vdw depth of 0.1 kcal/mole
@@ -238,34 +221,51 @@ def rmsd_conf(iconf_ref,iconf,conf_coords,natom):
       sd2 += (conf_coords[iconf_ref][i][k] - conf_coords[iconf][i][k])**2
   rmsd = math.sqrt(sd2/natom)
   return rmsd
+#
+def sort_1_by_2(x,y,rev=False):
+  """
+  sort one list by elements in another list
+  """
+  #print('reverse',rev)
+  if(len(x) == len(y)):
+    y_x = zip(y,x)
+    y_x_sorted = sorted(y_x,reverse=rev)
+    y = [z[0] for z in y_x_sorted]
+    x = [z[1] for z in y_x_sorted]
+    return x,y
+  else:
+    print('lists of different length- not sorting')
 # =======================
 #         MAIN
 # =======================
 # input file
-flipit = False
 print('\nread pdb file with auto dock  torsion information from pdbqt')
-print('and sample conformers, generate 3 180o-flipmers, and ')
+print('and sample conformers randomly, option to generate 3 180o-flipmers, and ')
 print('write out in MODEL/ENDMDL format for pymol and dockeye multi\n')
-if(len(sys.argv) < 2):
-  print('USAGE: python sample_conformers.py pdbfile {flipit (T/F)')
+if(len(sys.argv) < 3):
+  print('USAGE: python random_conformers.py pdbfile nconf {flipit (T/F)}')
   sys.exit()
 pdbfile = sys.argv[1]
-if(len(sys.argv) == 3):
+nconfmax = int(sys.argv[2])
+print('# of conformers: ',nconfmax)
+flipit = False
+if(len(sys.argv) == 4):
   flipit = True
 #
 if(flipit):
   print('Generating 3 flipmers for each conformer')
 else:
   print('Not generating flipmers')
+print('reading input pdb file...')
 pdb1 = pdb_struct()
 pdb1.readfile(pdbfile)
 qnet = 0.
 for i in range(pdb1.natom):
   qnet += pdb1.bfact[i]
-print('Net charge from bfactor column: ',qnet)
+print('Net charge from bfactor column: %8.3f' %(qnet))
 #
 # output file
-pdbout = pdbfile[0:-4] + '_cnf.pdb'
+pdbout = pdbfile[0:-4] + '_ran.pdb'
 print('writing conformers to file ',pdbout)
 pdb_out = open(pdbout,'w')
 #
@@ -273,16 +273,11 @@ pdb_out = open(pdbout,'w')
 #
 if(pdb1.ntor == 0):
   print('no torsions, just 1 conformer')
-  nconf = 1
-  pdb_out.write('MODEL %3d\n' % (nconf))
-  for i in range(pdb1.natom):
-    #
-    string = 'ATOM %6d%6s%4s%1s%4s    %8.3f%8.3f%8.3f%6.2f%7.3f \n' % (i,pdb1.name[i],pdb1.res[i], \
-    pdb1.chain[i], pdb1.resnum[i], pdb1.coords[i][0],pdb1.coords[i][1],pdb1.coords[i][2], \
-    pdb1.radius[i],pdb1.bfact[i])
-    pdb_out.write(string)
-  pdb_out.write('ENDMDL\n')
-  sys.exit()
+  nconfmax = 1
+if(nconfmax == 1):
+  nsample = 0
+else:
+  nsample = 200
 #
 # create list of bonds
 #
@@ -296,183 +291,152 @@ non_bonds = make_nonbonds(bond_list,pdb1.natom)
 print('# of nonbond interactions: ',len(non_bonds))
 #print(non_bonds)
 #
-# monte carlo sample rotamers
-#
-nconfmax = 10
 conf_coords = np.zeros((nconfmax,pdb1.natom,3),'f')
 conf_econf = np.zeros(nconfmax,'f')
+conf_index = np.zeros(nconfmax,'int')
+#
 # make working copies of coords
+#
 xyz = [0.,0.,0.]
 crds_old = []
 crds_new = []
+cen_old = [0.,0.,0.]
 for i in range(pdb1.natom):
   for k in range(3):
     xyz[k] = pdb1.coords[i][k]
+    cen_old[k] += xyz[k]
   crds_old.append([xyz[0],xyz[1],xyz[2]])
   crds_new.append([xyz[0],xyz[1],xyz[2]])
+for k in range(3):
+  cen_old[k] /= pdb1.natom
+print('center of original conformer: ',cen_old)
 #
 # store original coords and its energy
+#
 nconf = 0
 econf_old = conf_energy(pdb1,crds_old,non_bonds)
 print('Initial energy: ',econf_old)
-conf_econf[nconf] = econf_old
-for i in range(pdb1.natom):
-  for k in range(3):
-    conf_coords[nconf][i][k] = crds_old[i][k]
+#conf_econf[nconf] = econf_old
+#conf_index[nconf] = nconf
+#for i in range(pdb1.natom):
+#  for k in range(3):
+#    conf_coords[nconf][i][k] = crds_old[i][k]
+#nconf += 1
 #
-# cycle thru all torsions, random rotations
-# accept or reject based on dEnergy, every N moves, store conformation
-# until we have nconfmax 
-nmove = 50
+# init variables for sampling
 pi = 3.14159
 dangles = [-120.,120.,180.]
 axis = [0.,0.,0.]
 rmt1 = mt.Rotmat()
-kT = 0.002*300
-#pdb1.ntor = 2 # debug
-#for nconf in range(1,nconfmax):
-for nconf in range(1,nconfmax):
-  for move in range(nmove):
-    for tor in range(pdb1.ntor):
+nrep = 0
+for isample in range(nsample):
+  # select random torsion, change
+  # when list full, sort, replace worst with current if better
+  itor = rn.randint(1,pdb1.ntor) - 1
+  #print('selecting torsion: ',itor)
+  #
+  # get vector along rotating bond
+  a1 = pdb1.branch_atoms[itor][0] - 1
+  a2 = pdb1.branch_atoms[itor][1] - 1
+  #print(itor,'twisting about ',a1,a2)
+  for k in range(3):
+    #print(crds[a2][k] , crds[a1][k])
+    axis[k] = crds_new[a2][k] - crds_new[a1][k]
+  mt.vnorm(axis)
+  #print(axis)
+  # debug
+  #axis[0] = 0.
+  #axis[1] = 0.
+  #axis[2] = 1.
+  #
+  # generate rotation matrix for current rotation about this bond
+  #chi = 180.
+  iran = rn.randint(0,len(dangles)-1)
+  chi = dangles[iran]
+  #print('chi: ',chi)
+  psi = 180.*math.asin(axis[2])/pi
+  xy = math.sqrt(axis[0]**2 + axis[1]**2)
+  if(xy < 1.e-6):
+    phi = 90.
+  else:
+    phi = 180.*math.acos(axis[0]/xy)/pi
+  if(axis[1] < 0.):phi = -1.*phi
+  #print('phi,psi,chi: ',phi,psi,chi)
+  rmt1.polar_rot(phi,psi,chi)
+  #rmt1.printm()
+  #
+  # apply rotation to all atoms in this branch
+  for j in range(a2+1,pdb1.branchend[itor]):
+    #print('%4d ' % (j),end='')
+    for k in range(3):
       #
-      # trial conformation
+      # shift atom so end of bond is origin
+      xyz[k] = crds_new[j][k] - crds_new[a2][k]
+    # apply rotation and shift back
+    xyz1 = rmt1.rot_vec(xyz)
+    #print('xyz:  ',xyz)
+    #print('xyz1: ',xyz1)
+    for k in range(3):
+      crds_new[j][k] = xyz1[k] + crds_new[a2][k]
+  #print(' \n')
+  #
+  # score current conformer
+  econf_new = conf_energy(pdb1,crds_new,non_bonds)
+  #print('new E: ',itor,econf_new,nconf)
+  #
+  # add to the list
+  if(nconf < nconfmax):
+    conf_econf[nconf] = econf_new
+    conf_index[nconf] = nconf
+    for i in range(pdb1.natom):
+      for k in range(3):
+        conf_coords[nconf][i][k] = crds_new[i][k]
+    nconf += 1
+  else:
+    #print('reached max confs')
+    # sort energies,
+    conf_index_sort, conf_econf_sort = sort_1_by_2(conf_index,conf_econf,rev=False)
+    iworst = conf_index_sort[nconf-1]
+    eworst = conf_econf[iworst]
+    #print('worst conf: ',iworst,eworst)
+    if(econf_new < eworst): # replace worst conf with current one
+      print('replacing ',iworst,econf_new,isample)
+      nrep += 1
+      conf_econf[iworst] = econf_new
       for i in range(pdb1.natom):
         for k in range(3):
-          crds_new[i][k] = crds_old[i][k]
-      #
-      # get vector along rotating bond
-      a1 = pdb1.branch_atoms[tor][0] - 1
-      a2 = pdb1.branch_atoms[tor][1] - 1
-      #print(tor,'twisting about ',a1,a2)
-      for k in range(3):
-        #print(crds[a2][k] , crds[a1][k])
-        axis[k] = crds_new[a2][k] - crds_new[a1][k]
-      mt.vnorm(axis)
-      #print(axis)
-      # debug
-      #axis[0] = 0.
-      #axis[1] = 0.
-      #axis[2] = 1.
-      #
-      # generate rotation matrix for current rotation about this bond
-      #chi = 180.
-      iran = rn.randint(0,len(dangles)-1)
-      chi = dangles[iran]
-      #print('chi: ',chi)
-      #chi = 120.*iran
-      psi = 180.*math.asin(axis[2])/pi
-      xy = math.sqrt(axis[0]**2 + axis[1]**2)
-      if(xy < 1.e-6):
-        phi = 90.
-      else:
-        phi = 180.*math.acos(axis[0]/xy)/pi
-      if(axis[1] < 0.):phi = -1.*phi
-      #print('phi,psi,chi: ',phi,psi,chi)
-      rmt1.polar_rot(phi,psi,chi)
-      #rmt1.printm()
-      #
-      # apply rotation to all atoms in this branch
-      for j in range(a2+1,pdb1.branchend[tor]):
-        #print('%4d ' % (j),end='')
-        for k in range(3):
-          #
-          # shift atom so end of bond is origin
-          xyz[k] = crds_new[j][k] - crds_new[a2][k]
-        # apply rotation and shift back
-        xyz1 = rmt1.rot_vec(xyz)
-        #print('xyz:  ',xyz)
-        #print('xyz1: ',xyz1)
-        for k in range(3):
-          crds_new[j][k] = xyz1[k] + crds_new[a2][k]
-      #print(' \n')
-      #
-      # score current conformer
-      econf_new = conf_energy(pdb1,crds_new,non_bonds)
-      # and accept or reject
-      deconf = (econf_new - econf_old)/kT
-      deconf = max(deconf,-10.)
-      deconf = min(deconf,20.)
-      #print('deconf: %10.3f %10.3f %10.3f ' %(econf_old,econf_new,deconf))
-      expdeconf = math.exp(-1.*deconf)
-      #print(econf_old,econf_new,deconf,expdeconf)
-      raccept = rn.random()
-      if(raccept <= expdeconf): # accept
-        econf_old = econf_new
-        for i in range(pdb1.natom):
-          for k in range(3):
-            crds_old[i][k] = crds_new[i][k]
-    # end torsion loop
-  # end move loop # and store this conformation
-  conf_econf[nconf] = econf_old
-  for i in range(pdb1.natom):
-    for k in range(3):
-      conf_coords[nconf][i][k] = crds_old[i][k]
-  # compare new conf with all older ones by rmsd
-  rmsd_min = 1000.
-  rmsd_max = 0.
-  for i in range(1,nconf+1):
-    rmsd = rmsd_conf(0,i,conf_coords,pdb1.natom)
-    rmsd_min = min(rmsd_min,rmsd)
-    rmsd_max = max(rmsd_max,rmsd)
-  print('storing: ',nconf,econf_old,rmsd_min,rmsd_max)
-# end conformation gathering loop
-#
-# find largest rigid block (scaffold) and align all conformers by this afore output
-rigid_i = pdb1.rigid[0][0]
-rigid_j = pdb1.rigid[0][1]
-nrigid = rigid_j - rigid_i + 1
-for i in range(len(pdb1.rigid)):
-  i1 = pdb1.rigid[i][1] - pdb1.rigid[i][0] + 1
-  if(i1 > nrigid):
-    rigid_i = pdb1.rigid[i][0]
-    rigid_j = pdb1.rigid[i][1]
-    nrigid = rigid_j - rigid_i + 1
-#
-# allign by  whole molecule instead
-rigid_i = 1
-rigid_j = pdb1.natom
-nrigid = rigid_j - rigid_i + 1
-print('aligning by largest rigid unit: ',rigid_i,' to ',rigid_j)
-co1 = np.zeros((nrigid,3),'f')
-co2 = np.zeros((nrigid,3),'f')
-#
-# ref for alignment is 1st conf
-i1 = 0
-cen1 = [0.,0.,0.]
-for i in range(rigid_i-1,rigid_j):
+          conf_coords[iworst][i][k] = crds_new[i][k]
+    #sys.exit()
+# end sample loop
+print('number of times a better conf was found: ',nrep)
+print(conf_econf,conf_index)
+#print(conf_econf_sort,conf_index_sort)
+# align all conformers before output
+co1 = np.zeros((pdb1.natom,3),'f')
+co2 = np.zeros((pdb1.natom,3),'f')
+for i in range(pdb1.natom):
   for k in range(3):
-    co1[i1][k] = conf_coords[0][i][k]
-    cen1[k] += co1[i1][k]
-  i1 += 1
-for k in range(3):
-  cen1[k] /= nrigid
-for i1 in range(nrigid):
-  for k in range(3):
-    co1[i1][k] -= cen1[k]
-#
-# align of rest to # 1
+    co1[i][k] = crds_old[i][k] - cen_old[k]
 cen2 = [0.,0.,0.]
 xyz = [0.,0.,0.]
 xyz1 = [0.,0.,0.]
-for nconf in range(1,nconfmax):
+for nconf in range(nconfmax):
   #
-  # copy and center coords of scaffold
-  i1 = 0
+  # copy and center coords of each conformaer
   for k in range(3):
     cen2[k] = 0.
-  for i in range(rigid_i-1,rigid_j):
+  for i in range(pdb1.natom):
     for k in range(3):
-      co2[i1][k] = conf_coords[nconf][i][k]
-      cen2[k] += co2[i1][k]
-    i1 += 1
+      co2[i][k] = conf_coords[nconf][i][k]
+      cen2[k] += co2[i][k]
   for k in range(3):
-    cen2[k] /= nrigid
-  for i1 in range(nrigid):
+    cen2[k] /= pdb1.natom
+  for i in range(pdb1.natom):
     for k in range(3):
-      co2[i1][k] -= cen2[k]
+      co2[i][k] -= cen2[k]
   #
   # rigid body align
-  rms_min,qmin = supq.supq(co1,co2,nrigid)
+  rms_min,qmin = supq.supq(co1,co2,pdb1.natom)
   rotmat,angle = supq.qttomt(qmin)
   #print('min rmsd, quat: ',rms_min,qmin,rotmat,angle)
   #
@@ -484,10 +448,33 @@ for nconf in range(1,nconfmax):
       xyz1[k] = 0.
       for j in range(3):
         xyz1[k] += xyz[j]*rotmat[k][j]
-      conf_coords[nconf][i][k] = xyz1[k] + cen1[k]
-
+      conf_coords[nconf][i][k] = xyz1[k] + cen_old[k]
+# end alignment
+# write conformers
+pdb_out.write('MODEL %3d %12.5f\n' % (0,econf_old))
+for i in range(pdb1.natom):
+  for k in range(3):
+    xyz[k] = crds_old[i][k]
+  string = 'ATOM %6d%6s%4s%1s%4s    %8.3f%8.3f%8.3f%6.2f%7.3f \n' % (i,pdb1.name[i],pdb1.res[i], \
+  pdb1.chain[i], pdb1.resnum[i], xyz[0],xyz[1],xyz[2], \
+  pdb1.radius[i],pdb1.bfact[i])
+  pdb_out.write(string)
+pdb_out.write('ENDMDL\n')
+if(flipit):
+  crd_rot = supq.crd_flip(crds_old,pdb1.natom)
+  for nf in range(3):
+    pdb_out.write('MODEL %3d %12.5f\n' % (0,econf_old))
+    for i in range(pdb1.natom):
+      for k in range(3):
+        xyz[k] = crd_rot[i][k][nf]
+      string = 'ATOM %6d%6s%4s%1s%4s    %8.3f%8.3f%8.3f%6.2f%7.3f \n' % (i,pdb1.name[i],pdb1.res[i], \
+      pdb1.chain[i], pdb1.resnum[i], xyz[0],xyz[1],xyz[2], \
+      pdb1.radius[i],pdb1.bfact[i])
+      pdb_out.write(string)
+    pdb_out.write('ENDMDL\n')
+#
 for nconf in range(nconfmax):
-  pdb_out.write('MODEL %3d %12.5f\n' % (nconf,conf_econf[nconf]))
+  pdb_out.write('MODEL %3d %12.5f\n' % (nconf+1,conf_econf[nconf]))
   for i in range(pdb1.natom):
     for k in range(3):
       xyz[k] = conf_coords[nconf][i][k]
@@ -508,6 +495,5 @@ for nconf in range(nconfmax):
         pdb1.radius[i],pdb1.bfact[i])
         pdb_out.write(string)
       pdb_out.write('ENDMDL\n')
-
-print('# of conformers: ',nconf)
+print('# of conformers: ',nconfmax)
 pdb_out.close()

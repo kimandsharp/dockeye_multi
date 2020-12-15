@@ -7,11 +7,12 @@
 # usage inside pymol command window: de('protein_target.pdb','ligand.pdb')
 # target protein 1st, then ligand- ligand pdb file must have at least one conformation
 # bracketed by MODEL, ENDMDL records
-# TODO: 
-# overlap all conformers at read time
 # compute energy for all conformers, but only generate dockeye object
 # for lowest energy conformer
+# TODO: 
+# overlap all conformers at read time
 # 22 apr 2020 add ability to save/restore poses
+# 28 nov 2020 option to display net force and torque instead of dockeye object
 #
 #############################################
 import sys
@@ -26,7 +27,7 @@ import dockeyeM_energy
 #=======================================
 # defs to create cgo object directly rather than reading from file
 def pymol_cgo_new(ctype):
-    cgo_obj = [LINEWIDTH, 3.0,BEGIN,ctype]
+    cgo_obj = [LINEWIDTH, 5.0,BEGIN,ctype]
     return cgo_obj
 def pymol_cgo_end(cgo_obj):
     cgo_obj.append(END)
@@ -99,7 +100,7 @@ def pymol_cgo_addtri(cgo_obj,v1,v2,v3,color,nm):
 #def de(pdbfile1="ag.pdb",pdbfile2="ab.pdb",charges=True):
 #def de(pdbfile1="ab.pdb",pdbfile2="ag.pdb",charges=True,logscale=True,dielectric=80.,eps=0.1):
 #def de(pdbfile1="ab.pdb",pdbfile2="ligand.pdbqt",charges=True,logscale=True,dielectric=80.,eps=0.1):
-def de(pdbfile1="IL1B.atm",pdbfile2="MIM_tor.atm",charges=True,logscale=True,dielectric=80.,eps=0.1):
+def de(pdbfile1="IL1B.atm",pdbfile2="MIM_tor.atm",charges=True,logscale=True,dielectric=80.,eps=0.1,vdwerg=True,forcerep=False):
   # extract names, and create the 'object' name in the pymol menu window
   print('22 apr 2020 add ability to save/restore poses')
   #pdbobj1 = pdbfile1[:-4]
@@ -110,7 +111,7 @@ def de(pdbfile1="IL1B.atm",pdbfile2="MIM_tor.atm",charges=True,logscale=True,die
   #
   # Dockeye class reads pdb file upon init
   pdbobj2 = 'dockeye_lig'
-  obj = Dockeye(pdbfile1,pdbfile2,pdbobj1,pdbobj2,charges,logscale,dielectric,eps)
+  obj = Dockeye(pdbfile1,pdbfile2,pdbobj1,pdbobj2,charges,logscale,dielectric,eps,vdwerg,forcerep)
   #
   # but pymol also loads first ligand model for display
   cmd.load('dockeye_lig.pdb',pdbobj2)
@@ -126,7 +127,7 @@ def de(pdbfile1="IL1B.atm",pdbfile2="MIM_tor.atm",charges=True,logscale=True,die
 
 #=======================================
 class Dockeye(Callback):
-  def __init__(self,pdbfile1,pdbfile2,pdbobj1,pdbobj2,charges,logscale,dielectric,eps):
+  def __init__(self,pdbfile1,pdbfile2,pdbobj1,pdbobj2,charges,logscale,dielectric,eps,vdwerg,forcerep):
     # calling arguments
     self.pdbfile1 = pdbfile1
     self.pdbfile2 = pdbfile2
@@ -134,12 +135,14 @@ class Dockeye(Callback):
     self.pdbobj2 = pdbobj2
     self.logscale = logscale
     self.dielectric = dielectric
+    self.forcerep = forcerep
     self.eps = eps
     self.nbest = [0,0]
     print('Initializing Dockeye...')
     print('pdb file 1: ',pdbfile1)
     print('pdb file 2: ',pdbfile2)
-    print('charges, logscale energy bars: ',charges,logscale)
+    print('charges, vdw energy, logscale energy bars: ',charges,vdwerg)
+    print('logscale energy bars, net force represenation: ',logscale,forcerep)
     print('energy parameters dielectric: %8.3f VDW depth: %8.3f' % (dielectric,eps))
     # read original pdb coords
     self.pdb1 = pdb_struct()
@@ -180,6 +183,11 @@ class Dockeye(Callback):
         self.qtot1 += self.pdb1.bfact[i]
       for i in range(self.pdb2.natom):
         self.qtot2 += self.pdb2.bfact[i]
+    if(not vdwerg):
+      for i in range(self.pdb1.natom):
+        self.pdb1.radius[i] = 0.
+      for i in range(self.pdb2.natom):
+        self.pdb2.radius[i] = 0.
     print('# of atoms 1: %6d   2: %6d' % (self.pdb1.natom,self.pdb2.natom))
     print('geometric centers: ')
     print('1:  %8.3f %8.3f %8.3f ' % (self.gcen1[0],self.gcen1[1],self.gcen1[2]))
@@ -324,7 +332,7 @@ class Dockeye(Callback):
           mark_pml = 'dockeye_mark_%d.pml'  % (mark_number)
           pmlfile = open(mark_pml,'w')
           pmlfile.write('#------------------------------------------------\n')
-          pmlfile.write('#run run $HOME/source/dockeye_multi/src/dockeyeM_c.py\n')
+          pmlfile.write('run $HOME/source/dockeye_multi/src/dockeyeM_c.py\n')
           pmlfile.write('de("%s","%s")\n'%(self.pdbfile1,mark_lig))
           pmlfile.write('#optional view settings\n')
           pmlfile.write('hide lines\n')
@@ -350,7 +358,7 @@ class Dockeye(Callback):
           do_mm = False
         if((delta_mv > 0.01) or do_mm): # we only update if pose or view changed
           cgo_obj = pdb_interaction(pdbmat1,pdbmat2,self.pdb1,self.pdb2,self.gcen1,self.gcen2,
-             self.energy,do_mm,self.logscale,self.dielectric,self.eps,self.nbest,self.energy_min)
+             self.energy,do_mm,self.logscale,self.dielectric,self.eps,self.nbest,self.energy_min,self.forcerep)
           if(self.nbest[0] != self.nbest[1]):
             # print('Switching models ',self.nbest)
             self.nbest[1] = self.nbest[0]
@@ -559,7 +567,7 @@ def pnl_make(rmt1,rmt2,gcen1,gcen2,trn1,trn2,energy,emin):
 
 #=======================================
 def pdb_interaction(pdbmat1,pdbmat2,pdb1,pdb2,gcen1,gcen2,energy,do_mm,logscale,dielectric,eps,
-                    nbest,emin):
+                    nbest,emin,forcerep):
   """
   # this is where we calculated interaction energy between
   # two molecules
@@ -661,21 +669,112 @@ def pdb_interaction(pdbmat1,pdbmat2,pdb1,pdb2,gcen1,gcen2,energy,do_mm,logscale,
   ndata = int(energy_obj[0])
   #print('ndata: ',type(ndata))
   #print('ndata: ',ndata)
+  #
+  # slice 6 force/torque terms off end of data
+  #
+  ftrans = [0.,0.,0.]
+  frot = [0.,0.,0.]
+  for k in range(3):
+    ftrans[k] = energy_obj[ndata-6+k]
+    frot[k] = energy_obj[ndata-3+k]
   # slice energy terms off end of data
   #energy[0] = energy_obj[ndata-3]
-  nbest[0] = int(energy_obj[ndata-1])
+  nbest[0] = int(energy_obj[ndata-7])
   #print('from energy_c best model is: ',nbest[0])
-  energy[1] = energy_obj[ndata-3]*DIEL/dielectric
-  energy[2] = energy_obj[ndata-2]*eps/EPS
+  energy[1] = energy_obj[ndata-9]*DIEL/dielectric
+  energy[2] = energy_obj[ndata-8]*eps/EPS
   energy[0] = energy[1] + energy[2]
   energy_obj[0] = LINEWIDTH # after we extract length of data, put real cgo 1st keyword back
   emin = min(emin,energy[0])
   # generate true Pymol object- one returned from C doesn't seem to work
-  cgo_obj = []
-  #for i in range(ndata): # bug- shouldn't pass energy, nbest!
-  for i in range(ndata-4): #  29 nov 2020 -4 is correct: -3 leave etotal behind
-    cgo_obj.append(energy_obj[i])
+  if(forcerep):
+    # generate net force/torque arrows instead of dockeye object
+    #print('forcerep: ',forcerep)
+    #print('ftrans: ',ftrans)
+    #print('frot: ',frot)
+    #
+    cgo_obj = pymol_cgo_new(LINES)
+    ftrans_mag = 0.
+    frot_mag = 0.
+    for k in range(3):
+      ftrans_mag += ftrans[k]**2
+      frot_mag += frot[k]**2
+    ftrans_mag = math.sqrt(ftrans_mag)
+    frot_mag = math.sqrt(frot_mag)
+    if(ftrans_mag > 0.):
+      for k in range(3):
+        ftrans[k] /= ftrans_mag
+    if(frot_mag > 0.):
+      for k in range(3):
+        frot[k] /= frot_mag
+    print('F trans, rot: ',ftrans_mag,frot_mag)
+    cbeg = 0.0
+    cend = 1.0
+    vbeg = [0.,0.,0.]
+    vend = [0.,0.,0.]
+    # ftrans arrow ...
+    for k in range(3):
+      vbeg[k] = gcen2[k] + trn2[k]
+      vend[k] = gcen2[k] + trn2[k] + ftrans[k]
+    pymol_cgo_addline(cgo_obj,vbeg,vend,cbeg,cend)
+    # ... head
+    cbeg = cend
+    ftp = vperp(ftrans)
+    for k in range(3):
+      vbeg[k] = vend[k] - 0.2*ftrans[k] + 0.2*ftp[k]
+    pymol_cgo_addline(cgo_obj,vbeg,vend,cbeg,cend)
+    for k in range(3):
+      vbeg[k] = vend[k] - 0.2*ftrans[k] - 0.2*ftp[k]
+    pymol_cgo_addline(cgo_obj,vbeg,vend,cbeg,cend)
+    cend = 0.5
+    cbeg = 0.5
+    # frot torque bar...
+    frp = vperp(frot)
+    frpp = vcross(frp,frot)
+    for k in range(3):
+      vbeg[k] = gcen2[k] + trn2[k]
+      vend[k] = gcen2[k] + trn2[k] + frp[k]
+    pymol_cgo_addline(cgo_obj,vbeg,vend,cbeg,cend)
+    # and arrow  ....
+    for k in range(3):
+      vbeg[k] = vend[k]
+      vend[k] = vbeg[k] + frpp[k]
+    pymol_cgo_addline(cgo_obj,vbeg,vend,cbeg,cend)
+    # ... head
+    ftp = vperp(frpp)
+    for k in range(3):
+      vbeg[k] = vend[k] - 0.2*frpp[k] + 0.2*ftp[k]
+    pymol_cgo_addline(cgo_obj,vbeg,vend,cbeg,cend)
+    for k in range(3):
+      vbeg[k] = vend[k] - 0.2*frpp[k] - 0.2*ftp[k]
+    pymol_cgo_addline(cgo_obj,vbeg,vend,cbeg,cend)
+    # frot torque bar...
+    for k in range(3):
+      vbeg[k] = gcen2[k] + trn2[k]
+      vend[k] = gcen2[k] + trn2[k] - frp[k]
+    pymol_cgo_addline(cgo_obj,vbeg,vend,cbeg,cend)
+    # ... arrow....
+    for k in range(3):
+      vbeg[k] = vend[k]
+      vend[k] = vbeg[k] - frpp[k]
+    pymol_cgo_addline(cgo_obj,vbeg,vend,cbeg,cend)
+    # ... head
+    for k in range(3):
+      vbeg[k] = vend[k] + 0.2*frpp[k] + 0.2*ftp[k]
+    pymol_cgo_addline(cgo_obj,vbeg,vend,cbeg,cend)
+    for k in range(3):
+      vbeg[k] = vend[k] + 0.2*frpp[k] - 0.2*ftp[k]
+    pymol_cgo_addline(cgo_obj,vbeg,vend,cbeg,cend)
+    #
+    cgo_obj.append(END)
+  else:
+    cgo_obj = []
+    #for i in range(ndata): # bug- shouldn't pass energy, nbest!
+    #for i in range(ndata-3): # pre nov 2020, fix to bug that did not slice off etotal
+    for i in range(ndata-10):
+      cgo_obj.append(energy_obj[i])
   pnl_make(rmt1,rmt2,gcen1,gcen2,trn1,trn2,energy,emin)
+  #print(cgo_obj)
   return cgo_obj
 
 def draw_ligand(pdbmat2,pdb2,gcen2,iconf):

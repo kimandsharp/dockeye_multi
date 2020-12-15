@@ -16,7 +16,7 @@ class pdb_struct:
         self.occ = []
         self.bfact = []
         self.atom_rads = {' C':1.8,' S':1.9,' O':1.6,' N':1.4,' P':1.8,' H':0.0,'ZN':1.4,
-        ' Z':1.4,' B':2.46}
+        ' Z':1.4,' B':2.46,'MG':2.00}
     def readfile(self,pdb_name):
         try:
             pdb_file = open(pdb_name,"r") # python3
@@ -104,7 +104,7 @@ class pdb_struct:
               # only do names, charge, radius for first model
               if(self.nmodel == 1):
                 # this code will write ligand conformer #1 as graphical manipulation 'handle'
-                #tmp_pdb.write(entry)  
+                tmp_pdb.write(entry)  
                 for k in range(3):
                   gcen[k] += xyz[k]
                 self.natom +=1
@@ -134,6 +134,7 @@ class pdb_struct:
           # end of model
           if(self.nmodel == 1):
             # this code will generate a 3-d cross as a graphical manipulation handle
+            """
             for k in range(3): # create molecular handle for rot/trans
               gcen[k] /= self.natom
             strhead = 'HETATM    1  C1  HND A   1    '
@@ -154,6 +155,7 @@ class pdb_struct:
             gcen[2] -= 2.*dcen
             tmp_pdb.write("%s%8.3f%8.3f%8.3f%s\n" % (strhead,gcen[0],gcen[1],gcen[2],strtail))
             # end of code for a 3-d cross as a graphical manipulation handle
+            """
             tmp_pdb.close()
         # end of file
         if(self.nmodel == 0):

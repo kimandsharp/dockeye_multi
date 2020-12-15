@@ -20,7 +20,7 @@ home:
 	gcc -O2 -fPIC -m32 -c dockeyeM_energy.c -o dockeyeM_energy.o -I/usr/include -I/home/kim/anaconda2/include/python2.7/
 	gcc -m32 -shared -s dockeyeM_energy.o -lm  -L/home/kim/anaconda2/lib/python2.7/config/ -lpython2.7 -u MAIN__ -o dockeyeM_energy_linux14_python27_32bit.so
 	ln  -s -f $(SRC_C)/dockeyeM_energy_linux14_python27_32bit.so $(MODULE)
-	ln -s -f $(SRC_C)/dockeyeM_c_v1.4.py $(PYFILE)
+	ln -s -f $(SRC_C)/dockeyeM_c_v1.5.py $(PYFILE)
 #
 # mac book air
 macbook_fink:
