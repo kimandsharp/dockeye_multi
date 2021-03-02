@@ -27,31 +27,39 @@ example (all files needed to run th examples
 ===============================
 INSTALLATION
 ===============================
+USING downloaded builds (shared object files)
+===============================
+FOR MacOS, Ubuntu Linux (and possibly other Linux Distros)
+change to the src directory in the dockeye home directory
+make a soft link to the correct *.so
+On MacOs
+ln -s -i src_c/dockeyeM_energy_MacOS_python27_64bit.so dockeyeM_energy.so
+On Ubuntu Linux 16.04:
+ln -s -i src_c/dockeyeM_energy_linux16_python27_32bit.so dockeyeM_energy.so
+On Ubuntu Linux 14.04
+ln -s -i src_c/dockeyeM_energy_linux14_python27_32bit.so dockeyeM_energy.so
 
-1)
-If you are lucky, one of the shared object files dockeyeM_energy_XX.so
-in the src_c directory will work- some builds are 32bit because 
-they work with older pymol versions (pre-schrodinger and ones compiled
-from source at sourceforge.net). In this case
-in the source directory make a soft link from the correct *.so to
-dockeyeM_energy.so. for example on MacOs
-ln -s -i dockeyeM_energy_MacOS_python27_64bit.so dockeyeM_energy.so
+note some builds are 32bit because they work with older PyMol 
+versions (pre-schrodinger and ones compiled from source at sourceforge.net). 
 
-Otherwise go to 
-Option 2), compile from C code
+
+===============================
+COMPILING FROM SOURCE
+===============================
+alternatively, you can compile from C code
 
 some useful commands in this regard
-% file dockeyeM_energy_XX.so # type of file 
-% otool -L dockeyeM_energy_XX.so # libraries required/linked (linux equiv cmd: ldd)
+% file <filename>.so # type of file : 32 bit/64 bit, binary, ELF etc
+% otool <filename>.so # lists all required libraries and whether the are found 
+(linux equiv cmd: ldd)
 
-2)
-In the direcdtory src_c, 
-compile from c source code with the gcc compiler, using the makefile.
-The makefile has various rules for MacOS and ubuntu Linux which
-should work with little modifification
-
+Change to the directory src_c 
 A single C source file dockeyeM_energy.c needs to be compiled
-to generate the shared object file dockeyeM_energy.so
+to generate the shared object file to be soft linked to dockeyeM_energy.so
+in the parent src directory
+compile using the gcc compiler, using the makefile.
+The makefile has various rules for MacOS and ubuntu Linux which
+should work with little modification
 
 Since this object file will be imported as a module in Python
 it needs the python2.7 include file: Python.h
@@ -60,7 +68,7 @@ may need to install the Python development package)
 Then if necessary edit the compiler options in the makefile:
 
 -I<directory_where_Python.h_lives>
--lpython2.7  # should not need to change this default
+-lpython2.7  # should not need to change this default (this is for PyMol builds that use the python2.7)
 -L<directory_where_PyMol's_Python_dynamic/shared_library_lives>
 
 use the python-config command with --includes --libs and --ldflags
@@ -78,19 +86,8 @@ directory, like:
 or:
 -L/home/sharp/Downloads/pymol/ext/lib/ on ubuntu 16.02
 
-3)
-Whether you are using a precompiled *.so file or 
-the one you compiled, you need to 
-set the environment variable PYTHONPATH to
-the dockeye source directory, something like:
-cshell: setenv PYTHONPATH /home/<username>/source/dockeye_multi/src
-bash: export PYTHONPATH='/home/<username>/source/dockeye_multi/src'
-
-or if PYTHONPATH is already defined, add the dockeye src directory to it
-cshell: setenv PYTHONPATH /home/<username>/source/dockeye_multi/src:$PYTHONPATH
-
-to check, start the python2.7 interpretor at the command line and try to import dockeye_methods
-if succesful, PYTHONPATH is set correctly
+More recent PyMol builds use python3.6 and later, so the the rules in the makefile
+should be changed to use python3.X includes and library directories
 
 for details on using dockeye_multi, read dockeye_workflow.pdf
 and run the examples
