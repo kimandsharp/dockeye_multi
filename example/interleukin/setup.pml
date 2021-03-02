@@ -1,4 +1,4 @@
-run $PYTHONPATH/dockeyeM_c.py
+run $HOME/source/dockeye_multi/src/dockeyeM_c.py
 de('IL1B.pdb','MIM_tor.pdb')
 hide lines
 spectrum b, red_white_blue

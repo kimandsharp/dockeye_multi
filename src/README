@@ -18,6 +18,7 @@ dockeye_methods.py defs/classes/methods
 matrix3.py         basic vector/matrix ops for make_conformers.py
 
 helper/prep programs
+--------------------
 dockeye_prep.py    optional prep stage. Using your pdb format files,
                    will nicely position your
                    protein and ligand ready for dockeye
@@ -28,25 +29,43 @@ dockeye_prep.py    optional prep stage. Using your pdb format files,
 pdbqt_to_pdb.py    reads pdbqt format coordinate file output from autodock tools,
                    moves autdock charges into bfactor field, and assigns radii.
                    use on protein target pdbqt file and on ligand pdbqt file 
-make_conformers.py generates a ligand *.pdb file for use with dockeye_multi
-                   reads the torsion/root/branch records placed inside a pdb file
-                   by the vina autodock tool, adt. 
-                   the output file contains multiple ligand conformers based
-                   on 3 rotation angles around specified torsions 
-                   each conformer delimited by MODEL/ENDMDL
-make_conformers_flip.py does everything make_conformers.py does, then produces
-                   the three 180o flipped versions of each conformer (so 4x
-                   as many conformers in total - this can be large!)
+make_conformers.py
+make_conformers_flip.py
+random_conformers.py
+sample_conformers.py
+		   each of these python programs generates a ligand *.pdb file 
+		   for use with dockeye_multi that contains multiple ligand conformations
+                   separated by the MODEL/ENDMDL records. They all read the 
+                   torsion/root/branch records placed inside a pdbqt file
+                   by the vina autodock tool, adt. They differ in how they generate
+                   the different conformers: make_conformers.py exhaustively generates 
+                   3^Ntor rotamers around each torsion.  make_conformers.py does the same 
+                   and in addition generates the three 180o flipomers for each conformation, for 
+                   a total of 4*3^Ntor conformations(this can be v. large so limiting to
+                   4-5 torsions or less)
+                   random_conformers.py, and 
+                   sample_conformers.py sample conformers by a MC procedure, 
+                   using the internal non-bonded energy to accept/reject, until required
+                   # of 'lower' energy conformers are generated. This will avoid
+                   conformers with bad steric clashes produced by exhaustive enumeration,
+                   and also handle ligands with arbitrary # of torsions  
+
+ 
 psf_to_atm.py      extracts charges from charm/namd *.psf file, and
                    pastes these plus atomic radii into a pdb file
 
 post-dockeye
+--------------
 dockeyeM_getpose.py extracts low energy ligand poses from the dockeye
                    logfile into a pdb format file, also makes a movie
                    of all the poses
 
-to use dockeye_multi within PyMol this src directory must be added
-to your PYTHONPATH environment variable
+to use dockeye_multi within PyMol execute: 
+run <full_directory_path>/src/dockeyeM_c.py
+within Pymol's console window. 
+alternatively edit the PyMol script file setup.pml in the example/tryp directory and type
+pymol setup.pml 
+at the command line
 
 for more information on the way to use the various programs, see the 
 dockeye_workflow.pdf document in the parent directory.

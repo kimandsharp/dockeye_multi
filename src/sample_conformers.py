@@ -31,7 +31,7 @@ class pdb_struct:
         self.chain = []
         self.bfact = []
         self.atom_rads = {' C':1.8,' S':1.9,' O':1.6,' N':1.4,' P':1.8,' H':1.0,'ZN':1.4,
-        ' Z':1.4,' B':2.46, '1':1.0, '2':1.0, '3':1.0, 'X':0.0}
+        ' Z':1.4,' B':2.46, '1':1.0, '2':1.0, '3':1.0, 'X':0.0, ' F':1.56}
         self.root = [1,0]
     def readfile(self,pdb_name):
         try:
@@ -246,11 +246,13 @@ flipit = False
 print('\nread pdb file with auto dock  torsion information from pdbqt')
 print('and sample conformers, generate 3 180o-flipmers, and ')
 print('write out in MODEL/ENDMDL format for pymol and dockeye multi\n')
-if(len(sys.argv) < 2):
-  print('USAGE: python sample_conformers.py pdbfile {flipit (T/F)')
+if(len(sys.argv) < 3):
+  print('USAGE: python sample_conformers.py pdbfile nconformer {flipit (T/F)')
   sys.exit()
 pdbfile = sys.argv[1]
-if(len(sys.argv) == 3):
+nconfmax = int(sys.argv[2])
+print('# of conformers to be generated: ',nconfmax)
+if(len(sys.argv) == 4):
   flipit = True
 #
 if(flipit):
@@ -298,7 +300,7 @@ print('# of nonbond interactions: ',len(non_bonds))
 #
 # monte carlo sample rotamers
 #
-nconfmax = 10
+#nconfmax = 10
 conf_coords = np.zeros((nconfmax,pdb1.natom,3),'f')
 conf_econf = np.zeros(nconfmax,'f')
 # make working copies of coords

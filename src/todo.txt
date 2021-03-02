@@ -2,7 +2,9 @@ make_conformer.py: rationlize torsion dof's
 freom end record, branch records, and active/inactive
 torsion list in header remark sections. this only 
 needs to happen in changed # or dof's in adt/ligand
-processing.
+processing.: done my keeying of string 'A    between' which collects
+only active torsions
 
 clipping of protein # of atoms: suppress message from C 
 subroutine, and fix- not working now
+moot, since increased max atoms

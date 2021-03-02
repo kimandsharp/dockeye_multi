@@ -16,7 +16,7 @@ class pdb_struct:
         self.occ = []
         self.bfact = []
         self.atom_rads = {' C':1.8,' S':1.9,' O':1.6,' N':1.4,' P':1.8,' H':0.0,'ZN':1.4,
-        ' Z':1.4,' B':2.46,'MG':2.00}
+        ' Z':1.4,' B':2.46,'MG':2.00,' F':1.56}
     def readfile(self,pdb_name):
         try:
             pdb_file = open(pdb_name,"r") # python3

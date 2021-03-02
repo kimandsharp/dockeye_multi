@@ -1,7 +1,6 @@
 #------------------------------------------------
-#run $PYTHONPATH/dockeyeM_c.py
 run $HOME/source/dockeye_multi/src/dockeyeM_c.py
-de("de_prot_qr.pdb","de_ligand_qr_torf.pdb",forcerep=True)
+de("ab.pdb","dockeye_lig_bad_pose_fig.pdb")
 #optional view settings
 hide lines
 spectrum b, red_white_blue
@@ -9,4 +8,3 @@ show sticks, dockeye_lig
 show surface, dockeye_prt
 set transparency, 0.4
 #------------------------------------------------
-

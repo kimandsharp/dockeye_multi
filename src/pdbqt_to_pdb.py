@@ -6,7 +6,7 @@ import sys
 #===============================
 atom_rads = {' C':' 1.80',' S':' 1.90',' O':' 1.60',' N':' 1.40',
         ' P':' 1.80',' H':' 0.00','ZN':' 1.40',
-        ' Z':' 1.40',' B':' 2.46'}
+        ' Z':' 1.40',' B':' 2.46',' F':' 1.56'}
 #===============================
 print('\n read pdbqt format coordinate file output from autodock tools,')
 print(' move autdock charges into bfactor field, and assign radii\n')
