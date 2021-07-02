@@ -3,6 +3,12 @@ INSTALLATION
 ===============================
 USING downloaded builds (shared object files)
 ===============================
+TO make life easy, rename the top directory created after teh github download
+dockeye_multi
+and place in a subdirectory called
+source
+in your home directory.
+
 FOR MacOS, Ubuntu Linux (and possibly other Linux Distros)
 change to the src directory in the dockeye home directory
 make soft links to the correct backend *.so and the correct front end *.py
@@ -16,6 +22,7 @@ ln -sf src_c/dockeyeM_c_v1.5.py dockeyeM_c.py
 PyMol versions 2.2 - 2.4 using Python3.X
 ln -sf src_f/dockeyeM_energy.cpython-37m-darwin.so dockeyeM_energy.so
 ln -sf src_f/dockeyeM_f_v1.4.py dockeyeM_c.py
+(these might require you to have the xcode developer package installed for the correct gcc/gfortran runtime libraries)
 
 On Ubuntu Linux 14.04
 ---------------------
@@ -38,6 +45,19 @@ ln -sf src_f/dockeyeM_f_v1.4.py dockeyeM_c.py
 note some builds are 32bit because they work with older PyMol 
 versions (pre- and early schrodinger versions and ones compiled from source at sourceforge.net). 
 
+=======================================
+Telling PyMol's python interpreter where to find the dockeye modules
+=======================================
+Since PyMol ships with its own Python interpreter and does not use your system's
+Python, there seems to be no nice way to do this. 
+You can try setting the PYTHONPATH environment variable (csh syntax here):
+setenv PYTHONPATH $HOME/source/dockeye_multi/src/
+or if it is already set, adding the dockeye path. Sometimes this works (on linux) 
+but not on my MAC.
+the sure way is to create a file called 
+dockeye.pth
+with the full path name for the dockeye src directory inside it, and place this file 
+in the site-packages directory of PyMOl's python interpretor
 
 ===============================
 COMPILING FROM SOURCE 

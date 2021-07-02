@@ -83,7 +83,7 @@ print('create *.atm from pdb file by:')
 print('getting charge from charmm psf file')
 print('assigning radii')
 if(len(sys.argv)<3):
-  print('USAGE: psf_netcrg.py psf_file pdb_file')
+  print('USAGE: psfpdb_to_atm.py psf_file pdb_file')
   sys.exit()
 #
 # read pdb file
