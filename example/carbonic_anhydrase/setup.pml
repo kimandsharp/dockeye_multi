@@ -1,5 +1,8 @@
 #------------------------------------------------
+<<<<<<< HEAD
 #set PYTHONPATH=( $HOME/source/dockeye_multi/src )
+=======
+>>>>>>> f9e987024ba796fd2c12a17ef06b9bf3bd0eb69f
 #run $PYTHONPATH/dockeyeM_c.py
 run $HOME/source/dockeye_multi/src/dockeyeM_c.py
 de("1cnx_prot_qr.pdb","1cnx_eg2_qr_cnf.pdb")
