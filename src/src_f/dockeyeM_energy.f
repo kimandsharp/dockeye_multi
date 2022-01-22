@@ -8,7 +8,8 @@ c
       integer num_points
       parameter (maxobjdata = 20000)
       parameter (maxcircle = 500)
-      parameter (num_points = 10)
+c      parameter (num_points = 10)
+      parameter (num_points = 5)
       real*8 atom_data(n)
       integer n,i,j,k,m
 c
@@ -40,7 +41,7 @@ c========================================
       n1 = int(atom_data(1))
       n2 = int(atom_data(2))
       nmod = int(atom_data(3))
-      print *,'n1: ',n1,n2,nmod
+c      print *,'n1: ',n1,n2,nmod
 c
 c calculate energies find best model
 c
@@ -94,7 +95,7 @@ c          print *,m,j,indcj,r2,q2,x2
           m_best = m
         end if
       end do
-      print *,'best model, energy: ',m_best, et_best
+c      print *,'best model, energy: ',m_best, et_best
 c
 c create dockeye object from best model
 c
@@ -136,6 +137,7 @@ c
             ninter_at = ninter_at + 1
             sigma = r1 + r2
             dd = sqrt(d2) + 1.e-3
+c            print *,'dd: ',dd
             rr = sigma/dd
             rr2 = rr*rr
             rr6 = rr2*rr2*rr2
@@ -155,6 +157,7 @@ c
             end if
           end if
         end do
+c        print *,'xyzmid: ',xyzmid
         if(ninter_at > 0)then ! create midline circle for strongest pair interaction
           d2 = 0.
           do k = 1,3
@@ -189,7 +192,7 @@ c
         end if
       end do
       et = ee + ev
-      print *,'number of interactions: ',ninter
+c      print *,'number of interactions: ',ninter
       ndata = 12*num_points*ninter + 5
       if(ndata .gt. maxobjdata)then
         print *,'warning: too many circles, 
@@ -203,7 +206,7 @@ c
       ndata = 1
       energy_obj(ndata) = LINEWIDTH
       ndata = ndata + 1
-      energy_obj(ndata) = 4. ! linewidth
+      energy_obj(ndata) = 7. ! linewidth
       ndata = ndata + 1
       energy_obj(ndata) = BEGIN
       ndata = ndata + 1
@@ -216,7 +219,7 @@ c
         call vnorm(v1)
         call vcross(v1,vp,v2)
         do k = 1,3
-          vbeg(k) = circle_rad(i) + circle_mid(k,i)
+          vbeg(k) = circle_rad(i)*v1(k) + circle_mid(k,i)
         end do
         do j = 1,num_points
           angle = j*tpi/num_points
@@ -227,6 +230,7 @@ c
      &      + circle_mid(k,i)
           end do
           call color_map(circle_color(i),rgb)
+c          print *,'rgb: ',rgb,circle_color(i)
           ndata = ndata + 1
           energy_obj(ndata) = KOLOR
           do k = 1,3
@@ -246,6 +250,7 @@ c
           do k = 1,3
             ndata = ndata + 1
             energy_obj(ndata) = vend(k)
+            vbeg(k) = vend(k)
           end do
         end do
       end do
@@ -261,11 +266,11 @@ c
       ndata = ndata + 1
       energy_obj(ndata) = m_best
       energy_obj(1) = ndata
-      print *,'# of return data: ',ndata
-      print *,energy_obj(1),energy_obj(2),energy_obj(3),energy_obj(4)
-      print *,energy_obj(ndata),energy_obj(ndata-1),energy_obj(ndata-2),
-     &     energy_obj(ndata-3),energy_obj(ndata-4)
-      return
+c      print *,'# of return data: ',ndata
+c      print *,energy_obj(1),energy_obj(2),energy_obj(3),energy_obj(4)
+c      print *,energy_obj(ndata),energy_obj(ndata-1),energy_obj(ndata-2),
+c     &     energy_obj(ndata-3),energy_obj(ndata-4)
+c      return
       end
 c
 c==========================
@@ -312,7 +317,7 @@ c
       rgb(1) = 1.
       rgb(2) = 1.
       rgb(3) = 1.
-      if((color .gt. 0.) .and. (color .lt. 0.5))then
+      if((color .ge. 0.) .and. (color .lt. 0.5))then
         rgb(1) = 0.
         rgb(2) = 2.*color
         rgb(3) = 1. - 2.*color

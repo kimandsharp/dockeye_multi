@@ -1,8 +1,11 @@
 Everything needed for dockeye examples
 assuming that you have PyMol installed
-and that the src directory where the dockeye module (shared object file)
-and other methods files reside, has been added to the PYTHONPATH
-environment variable
+in the example directories, the setup.pml PyMol
+srcipt files, while not required, will save you time
+typing into the PyMol command window
+the *.pml files assume that dockeye home file resides in
+a subdirectory called source in your home directory
+if not, edit the setup.pml file to set the correct path
 -------------------------------------------------------
 required files
 -------------------------------------------------------
@@ -31,22 +34,34 @@ setup.pml (optional) when run from within PyMol
 -------------------------------------------------------
 running
 -------------------------------------------------------
-1) Start up Pymol
+1) 
+Start up Pymol
 
-2) Either run the file dockeyeM_c.py in the
+2)
+Method A
+i) Run the file dockeyeM_c.py in the
 src directory from within PyMol, or put a line like
 run ~/source/dockeye_multi/src/dockeyeM_c.py
 in the file .pymolrc in your home directory
-to automatically run it every time you start up 
-PyMol
+to automatically run it every time you start up PyMol
 
-3) Run the file setup.pml from 
-PyMol (optional) or type
+ii) type
 de('<protein_pdbfile>','<ligand_pdbfile>')
-in the command window
+in the PyMol> command window to start dockeye and load the 
+protein and ligand structures
 
+Method B
+creat a Pymol command script file called setup.pml
+(or use one of those in the example directories)
+and at the command line type
+pymol setup.pml 
+
+3) 
 other default command line options that can be overidden are:
 charges=True,logscale=True,dielectric=80.,eps=0.1
+e.g.
+PyMol> de('<protein_pdbfile>','<ligand_pdbfile>',charges=False)
+and you will dock using just vdw (shape)
 
 4)
 change to 3 button mouse editing

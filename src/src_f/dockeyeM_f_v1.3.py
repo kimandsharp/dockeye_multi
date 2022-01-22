@@ -556,7 +556,8 @@ def pdb_interaction(pdbmat1,pdbmat2,pdb1,pdb2,gcen1,gcen2,energy,do_mm,logscale,
   # generate true Pymol object- one returned from C doesn't seem to work
   cgo_obj = []
   #for i in range(ndata): # bug- shouldn't pass energy, nbest!
-  for i in range(ndata-3):
+  #for i in range(ndata-3):
+  for i in range(ndata-4): # subtract 4 to fix pre nov 2020 bug that did not slice off etotal
     cgo_obj.append(energy_obj[i])
   pnl_make(rmt1,rmt2,gcen1,gcen2,trn1,trn2,energy,emin)
   return cgo_obj

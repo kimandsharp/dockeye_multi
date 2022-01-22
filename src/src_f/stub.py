@@ -10,7 +10,8 @@ import numpy  as np
 
 #=======================================
 #def de(pdbfile1="IL1B.atm",pdbfile2="MIM_tor.atm",charges=True,logscale=True,dielectric=80.,eps=0.1):
-def de(pdbfile1="ab.atm",pdbfile2="ag_tor.atm",charges=True,logscale=True,dielectric=80.,eps=0.1):
+#def de(pdbfile1="ab.atm",pdbfile2="ag_tor.atm",charges=True,logscale=True,dielectric=80.,eps=0.1):
+def de(pdbfile1="test1a.pdb",pdbfile2="test2a.pdb",charges=True,logscale=True,dielectric=80.,eps=0.0):
   # extract names, and create the 'object' name in the pymol menu window
   pdbobj1 = pdbfile1[:-4]
   #
@@ -168,9 +169,12 @@ def pdb_interaction(pdbmat1,pdbmat2,pdb1,pdb2,gcen1,gcen2,energy,do_mm,logscale,
   dockeyeM_energy.energy_f(energy_obj,atom_data)
   ndata = int(energy_obj[0])
   print('in calling program: ')
-  print(energy_obj[0],energy_obj[1],energy_obj[2],energy_obj[3])
-  print(energy_obj[ndata-1],energy_obj[ndata-2],
-            energy_obj[ndata-3],energy_obj[ndata-4],energy_obj[ndata-5])
+  il = int(energy_obj[0])
+  for i in range(il):
+    print(i,energy_obj[i])
+  #print(energy_obj[0],energy_obj[1],energy_obj[2],energy_obj[3])
+  #print(energy_obj[ndata-1],energy_obj[ndata-2],
+  #          energy_obj[ndata-3],energy_obj[ndata-4],energy_obj[ndata-5])
 
   """
   ndata = int(energy_obj[0])

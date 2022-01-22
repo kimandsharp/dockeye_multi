@@ -51,8 +51,9 @@ sample_conformers.py
                    and also handle ligands with arbitrary # of torsions  
 
  
-psf_to_atm.py      extracts charges from charm/namd *.psf file, and
-                   pastes these plus atomic radii into a pdb file
+psfpdb_to_atm.py   extracts charges from charm/namd *.psf file, and
+                   pastes these plus atomic radii into the occupancy & b-factor columns
+                   of the given pdb file
 
 post-dockeye
 --------------

@@ -320,11 +320,10 @@ class Dockeye(Callback):
               i1 += 1
             ligfile.write('ENDMDL\n')
           ligfile.close()
-          ligfile.close()
           mark_pml = 'dockeye_mark_%d.pml'  % (mark_number)
           pmlfile = open(mark_pml,'w')
           pmlfile.write('#------------------------------------------------\n')
-          pmlfile.write('#run run $HOME/source/dockeye_multi/src/dockeyeM_c.py\n')
+          pmlfile.write('run $HOME/source/dockeye_multi/src/dockeyeM_c.py\n')
           pmlfile.write('de("%s","%s")\n'%(self.pdbfile1,mark_lig))
           pmlfile.write('#optional view settings\n')
           pmlfile.write('hide lines\n')
@@ -770,17 +769,3 @@ def mark(mark_number=1):
   actionfile = open('dockeye_action','w')
   actionfile.write('mark %d\n'%(mark_number))
   actionfile.close()
-#def goto(mark_number=1):
-#  if(mark_number <1)or(mark_number>9):
-#    print('bookmark must be number 1-9 only')
-#    return
-#  markname = ('dockeye_mark.%d' %(mark_number))
-#  try: # check bookmark exists
-#    markfile = open(markname,'r')
-#    markfile.close()
-#  except:
-#    print('must bookmark ',mark_number,' first')
-#    return
-#  actionfile = open('dockeye_action','w')
-#  actionfile.write('goto %d\n'% (mark_number))
-#  actionfile.close()

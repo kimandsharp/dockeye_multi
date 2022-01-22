@@ -1,7 +1,6 @@
 #------------------------------------------------
-#run $PYTHONPATH/dockeyeM_c.py
 run $HOME/source/dockeye_multi/src/dockeyeM_c.py
-de("de_prot_qr.pdb","de_ligand_qr_torf.pdb",forcerep=True)
+de("de_prot_qr.pdb","de_ligand_qr_torf.pdb")
 #optional view settings
 hide lines
 spectrum b, red_white_blue
