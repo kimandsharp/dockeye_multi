@@ -36,7 +36,7 @@ PyMol versions using Python2.7 (32-bit)
 ln -sf src_c/dockeyeM_energy_linux16_python27_32bit.so dockeyeM_energy.so
 ln -sf src_c/dockeyeM_c_v1.5.py dockeyeM_c.py
 
-On Ubuntu Linux 14.04/16.04:
+On Ubuntu Linux 14.04/16.04/18.04:
 ---------------------
 PyMol versions 2.2 to 2.4 using Python3.7 (64-bit)
 ln -sf src_f/dockeyeM_energy.cpython-37m-x86_64-linux-gnu.so dockeyeM_energy.so
@@ -120,7 +120,8 @@ and run the examples
 FORTRAN code
 ===========
 this is very much a work in progress: the reason for using FORTRAN
-in the first place was that I just could not get C code to produce an importable
+in the first place was that on Ubuntu Linux
+I just could not get C code to produce an importable
 module for Python3.X, which has replaced Python2.7 in PyMol distros,
 however closely I followed the examples on the Python.org 3.X docs pages
 however, a plus is that using f2py avoids writing all the interface
@@ -128,7 +129,8 @@ goop needed to turn a C/FORTRAN subroutine into a Python object!
 
 change directory to src_f
 examine the makefile, it may need editing for your system
-and compile
+and compile:
+% make main
 
 3/1/2022 Update
 recently I have been unable to import the module within PyMol2.4, since
@@ -140,12 +142,12 @@ in case that broke my other apps. The solution is to edit the makefile
 so that it compiles using Pymol's python and f2py. e.g:
 make a copy of /home/sharp/Downloads/PyMOL-2.4.1_198-Linux-x86_64-py37/pymol/bin/f2py
 called say f2py_local
-and edit it to use the PyMol distro's Python3
-edit the make file to point to f2py_local
+and edit f2py_local to use the PyMol distro's Python3
+(the default is some random directory  wherever PyMol is maintained)
+then edit the makefile to point to f2py_local
 F2PY = /home/sharp/Downloads/PyMOL-2.4.1_198-Linux-x86_64-py37/pymol/bin/f2py
 you may find that the PyMol distro does not ship with the dev package of python
-i.e. missing the incldue file. No problem, hack on!
-So create a soft link in Pymol's python directory
+i.e. missing the python include files. No problem, hack on!
+create a soft link in Pymol's python directory
 to point to your python's include file:
 ln -s /home/sharp/miniconda3/include /home/sharp/Downloads/PyMOL-2.4.1_198-Linux-x86_64-py37/pymol/include
-
