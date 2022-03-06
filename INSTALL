@@ -54,10 +54,14 @@ You can try setting the PYTHONPATH environment variable (csh syntax here):
 setenv PYTHONPATH $HOME/source/dockeye_multi/src/
 or if it is already set, adding the dockeye path. Sometimes this works (on linux) 
 but not on my MAC.
+
 the sure way is to create a file called 
 dockeye.pth
 with the full path name for the dockeye src directory inside it, and place this file 
 in the site-packages directory of PyMOl's python interpretor
+for example on my Ubuntu workstation:
+% echo '/home/sharp/source/dockeye_multi/src/' > dockeye.pth
+% mv dockeye.pth /home/sharp/Downloads/PyMOL-2.4.1_198-Linux-x86_64-py37/pymol/lib/python3.7/site-packages/
 
 ===============================
 COMPILING FROM SOURCE 
@@ -125,3 +129,23 @@ goop needed to turn a C/FORTRAN subroutine into a Python object!
 change directory to src_f
 examine the makefile, it may need editing for your system
 and compile
+
+3/1/2022 Update
+recently I have been unable to import the module within PyMol2.4, since
+my numpy install has a later numpy API version than Pymol's: 
+0xe vs. 0xd
+
+I decided against rolling my numpy version back to match Pymol's
+in case that broke my other apps. The solution is to edit the makefile
+so that it compiles using Pymol's python and f2py. e.g:
+make a copy of /home/sharp/Downloads/PyMOL-2.4.1_198-Linux-x86_64-py37/pymol/bin/f2py
+called say f2py_local
+and edit it to use the PyMol distro's Python3
+edit the make file to point to f2py_local
+F2PY = /home/sharp/Downloads/PyMOL-2.4.1_198-Linux-x86_64-py37/pymol/bin/f2py
+you may find that the PyMol distro does not ship with the dev package of python
+i.e. missing the incldue file. No problem, hack on!
+So create a soft link in Pymol's python directory
+to point to your python's include file:
+ln -s /home/sharp/miniconda3/include /home/sharp/Downloads/PyMOL-2.4.1_198-Linux-x86_64-py37/pymol/include
+
