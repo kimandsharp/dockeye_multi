@@ -39,3 +39,7 @@ example (all files needed to run the examples
 INSTALLATION
 ===============================
 see the INSTALL file
+==============================
+pusing to github:
+ssh -T git@github.com
+git push
