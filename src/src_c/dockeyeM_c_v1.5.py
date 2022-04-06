@@ -216,6 +216,8 @@ class Dockeye(Callback):
     self.dockeye_log.write( 'net charge 1:  %8.3f 2:  %8.3f \n' % (self.qtot1,self.qtot2))
     self.dockeye_log.write('energy parameters dielectric: %8.3f VDW depth: %8.3f\n' % (dielectric,eps))
     self.dockeye_log.write('# of ligand conformers: %6d\n' % (self.pdb2.nmodel))
+    self.dockeye_log.flush()
+    os.fsync(self.dockeye_log.fileno())
 
 
   def __call__(self):
@@ -382,6 +384,8 @@ class Dockeye(Callback):
                 indx = j + 4*i
                 self.dockeye_log.write('%12.5f ' % (pdbmat2[indx]))
               self.dockeye_log.write('\n')
+            self.dockeye_log.flush()
+            os.fsync(self.dockeye_log.fileno())
           #else:
           #  if(do_mm): 
           #    #print('Current energy: ee: %12.3g ev: %12.3g et: %12.3g' % (ee,ev,et))

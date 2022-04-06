@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 subset st of make_conformers_flip.py that just
 generates the three poses created by

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #############################################
 #  Author: Kim Sharp
 #  Date:   7/21/2018
@@ -62,7 +63,7 @@ gcen2 = [0.,0.,0.]
 fields = contents[iline].split()
 for k in range(3):
   gcen2[k] = float(fields[k+1])
-#print(gcen1,gcen2)
+print('geometric centers: ',gcen1,gcen2)
 header = True
 iline += 1
 while(header):

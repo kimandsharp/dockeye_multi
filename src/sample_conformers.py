@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 read pdb file with auto dock  torsion information from pdbqt
 and sample conformers, write out in MODEL/ENDMDL format

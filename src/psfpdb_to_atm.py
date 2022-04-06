@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 create *.atm from pdb file by:
 getting charge from charmm psf file

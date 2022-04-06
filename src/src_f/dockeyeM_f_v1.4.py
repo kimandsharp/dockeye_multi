@@ -24,7 +24,7 @@ import numpy as np
 #=======================================
 # defs to create cgo object directly rather than reading from file
 def pymol_cgo_new(ctype):
-    cgo_obj = [LINEWIDTH, 3.0,BEGIN,ctype]
+    cgo_obj = [LINEWIDTH, 6.0,BEGIN,ctype]
     return cgo_obj
 def pymol_cgo_end(cgo_obj):
     cgo_obj.append(END)

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 read an auto dock format pdb file (*.pdbqt)
 and generate conformers, write out in MODEL/ENDMDL format

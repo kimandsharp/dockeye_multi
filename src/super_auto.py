@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 python implementation of super_auto.f
 c aligns atom in pdb file so as to minimize

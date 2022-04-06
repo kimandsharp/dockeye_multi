@@ -15,6 +15,30 @@ def arctan(x,y):
       if(y < 0.): angle = -1.*angle
     return angle
 
+def matdet(amat):
+  det = 0.
+  for i in range(3):
+    j = (i+1)%3
+    k = (i+2)%3
+    #print(i,j,k)
+    det += amat[0][i]*amat[1][j]*amat[2][k] - amat[0][i]*amat[1][k]*amat[2][j]
+  return det
+
+def matinv(amat):
+  det = matdet(amat)
+  ainv = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+  if(abs(det) < 1.e-10):
+    print('determinant zero - cannot find inverse returning I')
+    return ainv
+  for i1 in range(3):
+    j1 = (i1+1)%3
+    k1 = (i1+2)%3
+    for i2 in range(3):
+      j2 = (i2+1)%3
+      k2 = (i2+2)%3
+      ainv[i2][i1] = (amat[j1][j2]*amat[k1][k2] - amat[j1][k2]*amat[k1][j2])/det
+  return ainv
+
 class Rotmat:
     def __init__(self):
         self.terms = [[1., 0., 0.],[0.,1.,0.],[0.,0.,1.]]
@@ -234,19 +258,6 @@ class Rotmat:
         #print(' phi, psi, chi: ',phi,psi,chi)
         angles = [phi,psi,chi]
         return angles
-#=======================================
-def rot_vec(rmt,vec,inv=0):
-  vec_rot = [0.,0.,0.]
-  if(inv == 0):
-    for i in range(3):
-      for j in range(3):
-        vec_rot[i] += rmt[i][j]*vec[j]
-  else:
-    for i in range(3):
-      for j in range(3):
-        vec_rot[i] += rmt[j][i]*vec[j]
-  return vec_rot
-
 def vdot(v1,v2):
   dot = 0.
   for k in range(3):
@@ -266,10 +277,14 @@ def vnorm(v1):
   if(dot > 0.):
     for k in range(3):
       v1[k] /= dot
-  return dot
 #
 def vperp(v1):
   v2 = [v1[1],v1[2],v1[0]]
   v3 = vcross(v1,v2)
   return v3
-#=======================================
+
+def vdiff(v1,v2):
+  vdiff = [0.,0.,0.]
+  for k in range(3):
+    vdiff[k] = v2[k] - v1[k]
+  return vdiff

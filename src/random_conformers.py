@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 read pdb file with auto dock  torsion information from pdbqt
 and sample conformers randomly, keep nconf with lowest energy

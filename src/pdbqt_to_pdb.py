@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 read pdbqt format coordinate file output from autodock tools,
 move autdock charges into bfactor field, and assign radii
